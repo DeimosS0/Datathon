@@ -8,7 +8,7 @@ Bu depo, ekibimizle birlikte Datathon yarışmalarına hazırlanırken geliştir
 
 | Proje Adı | Durum | Kullanılan Teknolojiler | Link |
 | :--- | :---: | :--- | :--- |
-| **Used Car Price Prediction** | ✅ Tamamlandı | Regression, XGBoost, EDA | [İncele](./used-car-price-prediction) |
+| **Used Car Price Prediction** | ✅ Tamamlandı | Regression, XGBoost, EDA | [İncele](./used-car-price) |
 
 ---
 
