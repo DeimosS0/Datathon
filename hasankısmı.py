@@ -68,6 +68,7 @@ bb_clean = bb.groupby('SK_ID_BUREAU').agg(
 print("\nTertemiz bureau_balance özet tablosu hazır! Yeni boyut:", bb_clean.shape)
 display(bb_clean.head(20))
 
+# Taha yasin deneme
 bureau.info()
 
 (bureau.isnull().sum() / len(bureau)) * 100
