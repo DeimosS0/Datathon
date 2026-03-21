@@ -103,12 +103,10 @@ python src/rank_ensemble.py
 ```text
 📦 Hospital-NoShow-Prediction
  ┣ 📂 data                  # Raw Kaggle CSV files (Ignored in Git)
- ┣ 📂 notebooks             # EDA, Feature Importance & R&D
  ┣ 📂 src                   
  ┃ ┣ 📜 feature_engineering.py  # Bayesian logic & data compression
  ┃ ┣ 📜 train_autogluon.py      # OOM-Safe AutoML pipeline
  ┃ ┗ 📜 rank_ensemble.py        # Ranking, Blending & Override logic
- ┣ 📂 submissions           # Final generated CSVs
  ┣ 📜 requirements.txt      # Dependency list
  ┗ 📜 README.md             # You are reading this!
 ```
