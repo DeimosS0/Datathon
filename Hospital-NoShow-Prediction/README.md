@@ -1,94 +1,142 @@
-# 🏥 Hospital Appointment No-Show Prediction
-> *Kaggle Datathon Project: Modeling Human Behavior with Data-Centric AI & AutoML*
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=250&section=header&text=Hospital%20No-Show%20Prediction&fontSize=50&animation=fadeIn&fontAlignY=38&desc=Predicting%20Human%20Behavior%20with%20Data-Centric%20AI&descAlignY=55&descAlign=50" alt="Header Banner" />
+</p>
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python)
-![AutoGluon](https://img.shields.io/badge/AutoGluon-OOM__Safe-orange?style=for-the-badge)
-![CatBoost](https://img.shields.io/badge/CatBoost-Optimized-yellow?style=for-the-badge)
-![XGBoost](https://img.shields.io/badge/XGBoost-Ensembled-red?style=for-the-badge)
-![Metric](https://img.shields.io/badge/Metric-PR--AUC-success?style=for-the-badge)
-![Score](https://img.shields.io/badge/Final_Score-0.5149-brightgreen?style=for-the-badge)
+<p align="center">
+  <a href="#"><img src="https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white" alt="Python"></a>
+  <a href="#"><img src="https://img.shields.io/badge/AutoGluon-OOM__Safe-FF6F00?style=for-the-badge&logo=jupyter&logoColor=white" alt="AutoGluon"></a>
+  <a href="#"><img src="https://img.shields.io/badge/CatBoost-Optimized-yellow?style=for-the-badge&logo=cat&logoColor=black" alt="CatBoost"></a>
+  <a href="#"><img src="https://img.shields.io/badge/XGBoost-Ensembled-red?style=for-the-badge&logo=xgboost&logoColor=white" alt="XGBoost"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Metric-PR--AUC-success?style=for-the-badge&logo=chartdotnet&logoColor=white" alt="Metric"></a>
+</p>
 
-## 📌 Project Overview
-This project is an end-to-end Machine Learning pipeline developed for a Datathon competition to predict the probability of patients missing their hospital appointments (`label_noshow`).
+<br>
 
-Predicting human behavior is inherently noisy. Instead of blindly stacking complex algorithms, this project adopts a **Data-Centric AI** philosophy. We tackled extreme class imbalance, prevented Kaggle out-of-memory (OOM) crashes, and utilized advanced AutoML frameworks combined with smart rank ensembling techniques.
-
----
-
-## 🎯 Competition Context & Evaluation
-| Criteria | Description |
-| :--- | :--- |
-| **Target Variable** | `label_noshow` (Binary Classification: 1 = No-show, 0 = Show) |
-| **Class Imbalance** | High (~20-25% No-show rate) |
-| **Evaluation Metric** | **PR-AUC (Precision-Recall Area Under Curve)**. Chosen specifically over ROC-AUC to maximize precision on the minority class due to the imbalanced nature of the dataset. |
-| **Final Score** | `0.5149` (Achieved via AutoGluon & Rank Ensembling) |
+> **Warning** > *Predicting human behavior is inherently noisy. This project completely abandons the brute-force "stacking everything" approach. Instead, it relies on strict Leakage-Free Feature Engineering, OOM-Safe AutoML, and Rank Ensembling.*
 
 ---
 
-## 🧠 Key Strategies & Insights
+## 🏆 The Grandmaster Scoreboard
+| Metric | Final Score | Architecture Highlights |
+| :---: | :---: | :--- |
+| **PR-AUC** | <kbd>0.5149</kbd> | *Bayesian Fusion, CatBoost + XGBoost, Rank Blend, Heuristic Override* |
 
-During the competition, we discovered that deep decision trees and over-engineered demographic features pushed the models into severe overfitting. Our final, successful strategy was built on four core pillars:
-
-### 1. Bayesian Historical Fusion (Leakage-Free)
-The most powerful predictor of future behavior is past behavior. When calculating historical no-show rates, we strictly prevented **Data Leakage** by sorting patients chronologically. Furthermore, to solve the "Cold Start" problem for new patients, we implemented **Bayesian Laplace Smoothing**:
-`bayesian_noshow_rate = (total_prior_noshows + 1) / (total_prior_appts + 2)`
-This mathematically prevented new patients from defaulting to a naive 0.0 risk score.
-
-### 2. Signal Hunting: Logistics over Demographics
-Feature importance analysis revealed that logistical factors heavily outweighed demographics. We narrowed the model's focus to the core signals:
-* `lead_time_hours`: The forgetfulness factor.
-* `wait_mins_est`: The frustration factor.
-* `distance_km`: Logistical difficulty.
-
-### 3. OOM-Safe AutoML (AutoGluon) Architecture
-
-
-To find the perfect ensemble without manual tuning, we deployed **AutoGluon**. However, standard AutoML often crashes Kaggle kernels (30GB RAM limit). We engineered an **"OOM Shield"**:
-* **Memory Reduction Script:** Downcasted `float64` to `float32` and `int64` to `int8/int16`, reducing dataframe memory usage by ~70%.
-* **Model Restriction:** Explicitly disabled RAM-heavy algorithms like Random Forest (RF), Extra Trees (XT), and KNN.
-* **Boosting-Only Ensembles:** Forced AutoGluon to build meta-ensembles exclusively using memory-efficient modern algorithms (CatBoost, LightGBM, XGBoost).
-
-### 4. Smart Blending (Rank Ensembling) & Heuristic Override
-
-
-Instead of directly averaging the probability outputs of our top pipelines, which can distort distributions, we blended their risk rankings **(Rank Ensembling)** with a 60/40 ratio. Furthermore, extreme cases that the machine hesitated on (e.g., chronic no-shows with 3+ missed appointments and a 100% fail rate) were manually overridden to a 0.99 probability, maximizing the PR-AUC score.
+*Note: In an extremely imbalanced dataset (~20% No-show), PR-AUC was strictly optimized over ROC-AUC to maximize minority-class precision.*
 
 ---
 
-## ⚙️ How to Run Locally
+## 🧠 Deep Dive: The "Secret Sauce" Architecture
 
-To replicate the results or explore the pipeline on your local machine:
+<details>
+<summary><b>1️⃣ Bayesian Historical Fusion (Leakage-Free)</b> <i>[Click to expand]</i></summary>
+<br>
+The most powerful predictor of future behavior is past behavior. However, traditional historical averages cause massive <b>Data Leakage</b> and fail on new patients (Cold Start). 
 
-1. Clone the repository:
-   ```bash
-   git clone [https://github.com/YOUR_USERNAME/Hospital-NoShow-Prediction.git](https://github.com/YOUR_USERNAME/Hospital-NoShow-Prediction.git)
-   cd Hospital-NoShow-Prediction
-   ```
+We engineered a chronologically strictly-shifted cumulative history and applied **Bayesian Laplace Smoothing**:
+<p align="center">
+<code>bayesian_noshow_rate = (total_prior_noshows + 1) / (total_prior_appts + 2)</code>
+</p>
+This mathematically assigns a "reasonable doubt" to new patients rather than a naive 0.0 risk score.
+</details>
 
-2. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   # Ensure AutoGluon is installed: pip install autogluon
-   ```
+<details>
+<summary><b>2️⃣ Signal Hunting: Logistics over Demographics</b> <i>[Click to expand]</i></summary>
+<br>
+Through iterative Feature Importance analysis, we discovered that tree-based models choked on demographic noise (age, socio-economic status). We pivoted to a <b>Sniper Approach</b>, isolating the top behavioral signals:
+<ul>
+  <li>⏱️ <code>lead_time_hours</code>: The forgetfulness factor.</li>
+  <li>⏳ <code>wait_mins_est</code>: The clinical frustration factor.</li>
+  <li>📍 <code>distance_km</code>: Logistical friction.</li>
+  <li>📱 <code>sms_lead_hours</code>: The exact timing/impact of reminders.</li>
+</ul>
+</details>
 
-3. Place the downloaded Kaggle datasets into the `data/` folder.
+<details>
+<summary><b>3️⃣ OOM-Safe AutoML (AutoGluon) Shield</b> <i>[Click to expand]</i></summary>
+<br>
+Standard AutoML often crashes 30GB Kaggle kernels. We engineered an <b>"OOM Shield"</b> for AutoGluon:
+<ul>
+  <li>📉 <b>Memory Compression:</b> Downcasted <code>float64</code> to <code>float32</code> and <code>int64</code> to <code>int8/int16</code> (70% memory reduction).</li>
+  <li>🚫 <b>Algorithm Restriction:</b> Explicitly disabled RAM-heavy architectures (Random Forest, Extra Trees, KNN, FastAI).</li>
+  <li>⚡ <b>Boosting-Only:</b> Forced meta-ensembles to exclusively use memory-efficient modern algorithms (CatBoost, LightGBM, XGBoost).</li>
+</ul>
+</details>
 
-4. Execute the OOM-Safe AutoGluon pipeline:
-   ```bash
-   python src/train_autogluon.py
-   ```
+<details>
+<summary><b>4️⃣ Smart Blending (Rank Ensembling) & Heuristic Overrides</b> <i>[Click to expand]</i></summary>
+<br>
+Averaging probabilities distorts underlying distributions. Instead, we blended the <b>risk rankings</b> of our top pipelines with a <code>60/40</code> ratio. 
 
-5. Generate the highest-scoring ensemble submission:
-   ```bash
-   python src/rank_ensemble.py
-   ```
+Finally, extreme cases that the machine hesitated on (e.g., chronic no-shows with 3+ missed appointments and a 100% fail rate) were manually overridden to a <b>0.99 probability</b>, maximizing the precision peak on the PR-AUC curve.
+</details>
 
 ---
 
-## 👨‍💻 Author
+## 🚀 Quick Start (How to Run Locally)
 
-**Emirhan** | *Data Science & Analytics*
-**Taha Yasin** | *Data Researcher & Analytics*
-**Hasan** | *Data Science & Analytics*
+**1. Clone the repository**
+```bash
+git clone [https://github.com/YOUR_USERNAME/Hospital-NoShow-Prediction.git](https://github.com/YOUR_USERNAME/Hospital-NoShow-Prediction.git)
+cd Hospital-NoShow-Prediction
+```
 
-*If you found this project insightful, consider leaving a ⭐ star!*
+**2. Install requirements**
+```bash
+pip install -r requirements.txt
+# Requires AutoGluon: pip install autogluon
+```
+
+**3. Run the OOM-Safe Training Pipeline**
+```bash
+python src/train_autogluon.py
+```
+
+**4. Execute Rank Ensemble & Generate Submission**
+```bash
+python src/rank_ensemble.py
+```
+
+---
+
+## 📂 Repository Structure
+
+```text
+📦 Hospital-NoShow-Prediction
+ ┣ 📂 data                  # Raw Kaggle CSV files (Ignored in Git)
+ ┣ 📂 notebooks             # EDA, Feature Importance & R&D
+ ┣ 📂 src                   
+ ┃ ┣ 📜 feature_engineering.py  # Bayesian logic & data compression
+ ┃ ┣ 📜 train_autogluon.py      # OOM-Safe AutoML pipeline
+ ┃ ┗ 📜 rank_ensemble.py        # Ranking, Blending & Override logic
+ ┣ 📂 submissions           # Final generated CSVs
+ ┣ 📜 requirements.txt      # Dependency list
+ ┗ 📜 README.md             # You are reading this!
+```
+
+---
+<br>
+
+<h3 align="center">👨‍💻 The Team</h3>
+
+<p align="center">
+  <i>Architected with 💡 by:</i>
+</p>
+
+<p align="center">
+  <b>Emirhan</b> | <i>Data Science & Analytics</i><br>
+  <a href="https://github.com/YOUR_USERNAME"><img src="https://img.shields.io/badge/GitHub-Emirhan-100000?style=for-the-badge&logo=github&logoColor=white" alt="Emirhan GitHub"></a>
+</p>
+
+<p align="center">
+  <b>Taha Yasin</b> | <i>Data Science & Machine Learning</i><br>
+  <a href="https://github.com/Taha-Yasin-Erturk"><img src="https://img.shields.io/badge/GitHub-Taha_Yasin-100000?style=for-the-badge&logo=github&logoColor=white" alt="Taha Yasin GitHub"></a>
+</p>
+
+<p align="center">
+  <b>Hasan</b> | <i>Data Science & Machine Learning</i><br>
+  <a href="https://github.com/hasandemir34"><img src="https://img.shields.io/badge/GitHub-Hasan-100000?style=for-the-badge&logo=github&logoColor=white" alt="Hasan GitHub"></a>
+</p>
+
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=100&section=footer" alt="Footer" />
+</p>
