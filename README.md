@@ -42,7 +42,7 @@ Bu projedeki her bir satır kod, veri madenciliği yolculuğumuzun bir parçası
         <img src="https://github.com/Taha-Yasin-Erturk.png?s=120" width="120px;" style="border-radius:50%;" alt="Taha Yasin"/><br />
         <br><b>Taha Yasin</b>
       </a><br />
-      👑 <i>Project Lead</i>
+       <i>Project Lead</i>
     </td>
     <td align="center" width="200">
       <a href="https://github.com/DeimosS0">
